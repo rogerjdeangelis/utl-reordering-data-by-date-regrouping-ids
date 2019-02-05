@@ -4,8 +4,30 @@ Reordering data by date regrouping ids.
                                                                                                                  
     Sort by the first occurance of lowest date within a group then                                               
     sort the dates within a group by date.                                                                       
-                                                                                                                 
-    This can probably be done very elegantly in R or IML?                                                        
+     
+    Recent improved solution by on end
+    Paul Dorfman <sashole@bellsouth.net>
+
+    Very nice single HASH solution.
+
+    Two HASH tables, seems a bit more logical then
+    a 'replace
+     method.
+
+    This is sort-within-sort of a single variable using a grouping variable.
+    Like a hierarchical sort?
+    Note date is not stricjly in ascending order. Dates within a
+    group may exceed thedate  values in subsequent row,
+
+    Very nice. It raises the question whether the same can be achieved
+    without sorting by [date,id] first outside the DATA step.
+    Though the answer is yes (below), I was a bit surprised
+    that it's more convoluted than I originally thought.
+
+    This can probably be done very elegantly in R or IML?   
+    
+    github
+    https://github.com/rogerjdeangelis/utl-reordering-data-by-date-regrouping-ids
                                                                                                                  
     https://tinyurl.com/y9drxt6d                                                                                 
     https://communities.sas.com/t5/SAS-Procedures/Reordering-data-by-date-but-grouping-ids/m-p/531299            
@@ -126,5 +148,55 @@ Reordering data by date regrouping ids.
                                                                                                                  
       2    2008     5                                                                                            
     */                                                                                                           
-                                                                                                                 
+            
+            
+    *____             _
+    |  _ \ __ _ _   _| |
+    | |_) / _` | | | | |
+    |  __/ (_| | |_| | |
+    |_|   \__,_|\__,_|_|
+
+    ;
+
+    data have ;
+      input id date ;
+      cards ;
+    1 2005
+    2 2008
+    3 2004
+    3 2012
+    4 2001
+    5 2016
+    5 2007
+    5 2010
+    run ;
+
+    data want ;
+      if 0 then set have ;
+      dcl hash h (dataset:"have", multidata:"Y", ordered:"A") ;
+      h.definekey  ("date", "id") ;
+      h.definedone () ;
+      dcl hiter ih ("h") ;
+      dcl hash r (multidata:"Y") ;
+      r.definekey  ("id") ;
+      r.definedata  ("date") ;
+      r.definedone () ;
+      dcl hash x () ;
+      x.definekey ("id") ;
+      x.definedone () ;
+      do while (ih.next() = 0) ;
+        r.add() ;
+      end ;
+      do while (ih.next() = 0) ;
+        if x.check() = 0 then continue ;
+        seq + 1 ;
+        do while (r.do_over() = 0) ;
+          output ;
+        end ;
+        x.add() ;
+      end ;
+      stop ;
+    run ;
+
+
                                                                                                                  
