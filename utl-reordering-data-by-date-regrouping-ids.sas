@@ -17,10 +17,11 @@ Like a hierarchical sort?
 Note date is not stricjly in ascending order. Dates within a
 group may exceed thedate  values in subsequent row,
 
-Very nice. It raises the question whether the same can be achieved
+Pauls Comment
+"Very nice. It raises the question whether the same can be achieved
 without sorting by [date,id] first outside the DATA step.
 Though the answer is yes (below), I was a bit surprised
-that it's more convoluted than I originally thought.
+that it's more convoluted than I originally thought."
 
                                                                                                            
 This can probably be done very elegantly in R or IML?    
